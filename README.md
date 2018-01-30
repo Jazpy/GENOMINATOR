@@ -1,5 +1,6 @@
 # GENOMINATOR
-Genome visualizer in C++ with OpenGL
+
+Genome visualizer in C++ with OpenGL. This will only render pretty things based on a genome, and is not intended for any serious use.
 
 ## Prerequisites
 
