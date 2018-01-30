@@ -1,0 +1,10 @@
+# Folders
+build/*
+
+# Compiled Object files
+*.o
+
+# Executables
+*.exe
+*.out
+*.app
