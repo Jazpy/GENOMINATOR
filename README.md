@@ -1,0 +1,2 @@
+# GENOMINATOR
+Genome visualizer
