@@ -60,7 +60,7 @@ Line::~Line()
 	glDisableVertexAttribArray(1);
 }
 
-void Line::bind_to_vao()
+void Line::BindToVAO()
 {
 	// Bind our VBOs
 	glEnableVertexAttribArray(0);

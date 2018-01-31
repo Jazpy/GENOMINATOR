@@ -25,5 +25,5 @@ class Line
 	~Line();
 
 	// Bind to the current VAO
-	void bind_to_vao();
+	void BindToVAO();
 };
