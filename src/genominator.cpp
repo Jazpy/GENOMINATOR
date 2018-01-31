@@ -6,13 +6,9 @@ using std::endl;
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-using glm::mat4;	using glm::vec3;
-
 #include <shader.hpp>
 #include <line.hpp>
+#include <camera.hpp>
 
 // Auxiliary setup functions
 void GLFWSetup(GLFWwindow **window);
@@ -39,24 +35,9 @@ int main()
 	GLuint vertex_array_id;
 	GLuint program_id;
 	GLSetup(vertex_array_id, program_id);
-	
-	// Get a handle for our "MVP" uniform
-	GLuint matrix_id = glGetUniformLocation(program_id, "MVP");
 
-	// projection matrix : 45° Field of view, 4:3 ratio,
-	// display range : 0.1 unit <-> 100 units
-	mat4 projection = glm::perspective(glm::radians(45.0f),
-		4.0f / 3.0f, 0.1f, 1000.0f);
-	// Camera matrix
-	mat4 view = glm::lookAt(
-		vec3(4,3,-3), // Camera is at (4,3,-3), in World Space
-		vec3(0,0,0), // and looks at the origin
-		vec3(0,1,0)  // Head is up (set to 0,-1,0 for upside-down)
-		);
-	// model matrix : an identity matrix (model will be at the origin)
-	mat4 model = mat4(1.0f);
-	// Our modelviewprojection : multiplication of our 3 matrices
-	mat4 MVP  = projection * view * model; 
+	// Setup our camera
+	Camera camera(program_id, 45.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
 	// Simple line for testing, create and bind
 	Line line;
@@ -68,7 +49,8 @@ int main()
 		
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
-		glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(camera.get_handle(), 1,
+			GL_FALSE, camera.get_transformation());
 
 		// Draw our current batch
 		glDrawArrays(GL_LINE_LOOP, 0, 1 * 3);
