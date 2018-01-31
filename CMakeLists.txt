@@ -11,6 +11,8 @@ add_executable(genominator
 	    src/genominator.cpp
 	    src/shader.cpp
 	    src/shader.hpp
+	    src/line.cpp
+	    src/line.hpp
 	    )
 
 target_link_libraries(genominator glfw ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
