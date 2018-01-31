@@ -31,7 +31,7 @@ int main( void )
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
@@ -57,6 +57,7 @@ int main( void )
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		getchar();
 		glfwTerminate();
+
 		return -1;
 	}
 
@@ -66,8 +67,9 @@ int main( void )
 	// Black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Enable depth test
+	// Enable depth test and culling
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS); 
 
