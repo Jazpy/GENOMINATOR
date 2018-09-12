@@ -11,8 +11,8 @@ add_executable(genominator
 	    src/genominator.cpp
 	    src/shader.cpp
 	    src/shader.hpp
-	    src/line.cpp
-	    src/line.hpp
+	    src/tree.cpp
+	    src/tree.hpp
 	    src/camera.cpp
 	    src/camera.hpp
 	    )

@@ -28,4 +28,7 @@ class Camera
 
 	// Get handle
 	GLint get_handle();
+
+	// Rotate around the origin
+	void rotate_origin();
 };
