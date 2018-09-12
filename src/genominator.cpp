@@ -7,7 +7,7 @@ using std::cin;		using std::endl;
 #include <GLFW/glfw3.h>
 
 #include <shader.hpp>
-#include <tree.hpp>
+#include <plane.hpp>
 #include <camera.hpp>
 
 // Auxiliary setup functions
@@ -44,9 +44,10 @@ int main()
 	// Setup our camera
 	Camera camera(program_id, 45.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
 
-	// Simple tree for testing, create and bind
-	Tree tree(iterations);
-	tree.BindToVAO();
+	// Simple plane for testing, create and bind
+	Plane plane(iterations);
+	plane.bind_buffer_data();
+	plane.bind_to_vao();
 
 	do {
 		// Clear the screen
@@ -61,7 +62,7 @@ int main()
 			GL_FALSE, camera.get_transformation());
 
 		// Draw our current batch
-		glDrawArrays(GL_LINES, 0, tree.get_lines() * 2);
+		glDrawArrays(GL_LINES, 0, plane.get_lines() * 2);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -138,8 +139,11 @@ void GLSetup(GLuint &vao, GLuint &program_id)
 	glBindVertexArray(vao);
 
 	// Create and compile our GLSL program from the shaders
-	program_id = LoadShaders("../assets/shaders/transform.vshader",
-		"../assets/shaders/color.fshader");
+	program_id = LoadShaders("../assets/shaders/genominator.vert",
+				 "../assets/shaders/genominator.tesc",
+				 "../assets/shaders/genominator.tese",
+				 "../assets/shaders/genominator.geom",
+				 "../assets/shaders/genominator.frag");
 
 	// Use our shader
 	glUseProgram(program_id);

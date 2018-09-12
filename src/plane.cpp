@@ -5,15 +5,15 @@
 #include <glm/vec3.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/geometric.hpp>
-#include <tree.hpp>
+#include <plane.hpp>
 
 using glm::vec3;
 using std::vector;
 
 typedef vector<float>::iterator vec_iter;
 
-// Fractal construction takes place in the constructor
-Tree::Tree(unsigned int iterations)
+// Construct plane with given characteristics
+Plane::Plane(unsigned int iterations)
 {
 	// Create initial iteration data, this represents the
 	// tree's "trunk"
@@ -86,7 +86,21 @@ Tree::Tree(unsigned int iterations)
 
 		curr = new_vec;
 	}
+}
 
+Plane::~Plane()
+{
+	// Cleanup VBO
+	glDeleteBuffers(1, &vertex_buffer);
+	glDeleteBuffers(1, &color_buffer);
+
+	// Cleanup attributes
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+}
+
+void Plane::bind_buffer_data()
+{
 	// Bind vertex buffer data
 	glGenBuffers(1, &vertex_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
@@ -102,18 +116,7 @@ Tree::Tree(unsigned int iterations)
 		&color_buffer_data[0], GL_STATIC_DRAW);
 }
 
-Tree::~Tree()
-{
-	// Cleanup VBO
-	glDeleteBuffers(1, &vertex_buffer);
-	glDeleteBuffers(1, &color_buffer);
-
-	// Cleanup attributes
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-}
-
-void Tree::BindToVAO()
+void Plane::bind_to_vao()
 {
 	// Bind our VBOs
 	glEnableVertexAttribArray(0);
