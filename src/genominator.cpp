@@ -38,12 +38,12 @@ int main()
 	GLSetup(program_id);
 
 	// Setup our camera
-	Camera camera(program_id, 90.0f, 16.0f / 9.0f, 5.0f, 150.0f, 3, 2);
+	Camera camera(program_id, 90.0f, 16.0f / 9.0f, 0.5f, 1000.0f, 50, 50);
 
 	// Simple plane for testing, create and bind
-	Plane plane(position_index);
+	Plane plane(21.0f, 21.0f, position_index);
+	// plane.sine_wave();
 	plane.bind_buffer_data();
-	// plane.bind_to_vao();
 
 	do {
 		// Update camera
@@ -51,8 +51,8 @@ int main()
 		
 		// Draw our current batch
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPatchParameteri(GL_PATCH_VERTICES, 3);
-		glDrawElements(GL_PATCHES, plane.get_index_count(), GL_UNSIGNED_INT, 0);
+		glPatchParameteri(GL_PATCH_VERTICES, plane.get_control_per_patch());
+		glDrawArrays(GL_PATCHES, 0, plane.get_control_count());
 
 		// Swap buffers
 		glfwSwapBuffers(window);

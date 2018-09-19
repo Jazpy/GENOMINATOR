@@ -1,4 +1,5 @@
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include <camera.hpp>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/quaternion.hpp>
@@ -30,13 +31,25 @@ Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
 	diffuse_mat_u = glGetUniformLocation(program_id, "DiffuseMaterial");
 	inner_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelInner");
 	outer_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelOuter");
+	patch_u = glGetUniformLocation(program_id, "B");
+	patch_transpose_u = glGetUniformLocation(program_id, "BT");
+
+	// Initialize patch matrices
+	mat4 bezier(
+		vec4(-1, 3, -3, 1),
+		vec4(3, -6, 3, 0),
+		vec4(-3, 3, 0, 0),
+		vec4(1, 0, 0, 0)
+		);
+	glUniformMatrix4fv(patch_u, 1, GL_FALSE, &bezier[0][0]);
+	glUniformMatrix4fv(patch_transpose_u, 1, GL_TRUE, &bezier[0][0]);
 	
 	// Initialize projection matrix
 	projection = perspective(radians(fov),
 		aspect_ratio, min_distance, max_distance);
 
 	// Update camera view matrix
-	vec3 camera_pos(0, 0, -10);
+	vec3 camera_pos(15, 15, 15);
 	vec3 target_pos(0, 0, 0);
 	vec3 up_vector(0, 1, 0);
 	modelview = lookAt(camera_pos, target_pos, up_vector);
@@ -61,11 +74,11 @@ void Camera::update(bool rotate)
 	glUniform1f(inner_tess_lvl_u, inner_tess_lvl);
 	glUniform1f(outer_tess_lvl_u, outer_tess_lvl);
 
-	vec4 light_pos(0.25f, 0.25f, 1.0f, 0.0f);
+	vec4 light_pos(0.0f, 15.0f, 0.0f, 0.0f);
 	glUniform3fv(light_pos_u, 1, &light_pos.x);
 
-	glUniform3f(ambient_mat_u, 0.04f, 0.04f, 0.04f);
-	glUniform3f(diffuse_mat_u, 0, 0.75, 0.75);
+	glUniform3f(ambient_mat_u, 0.0f, 0.0f, 0.0f);
+	glUniform3f(diffuse_mat_u, 0.0f, 0.0f, 0.0f);
 
 	// Send MVP to shaders
 	glUniformMatrix4fv(projection_u, 1, 0, &projection[0][0]);
