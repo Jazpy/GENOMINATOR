@@ -1,39 +1,76 @@
 #define GLM_ENABLE_EXPERIMENTAL
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <camera.hpp>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-using glm::vec3;	using glm::mat4;
+using glm::vec3;	using glm::vec4;
+using glm::mat4;	using glm::mat3;
 using glm::quat;
 
-Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
-	float min_distance, float max_distance)
-{
-	// Get our handle
-	matrix_id = glGetUniformLocation(program_id, "MVP");
+using glm::degrees;	using glm::radians;
+using glm::lookAt;	using glm::transpose;
+using glm::angleAxis;	using glm::toMat4;
+using glm::perspective;
 
-	// Initialize matrices
+Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
+	float min_distance, float max_distance, float inner, float outer)
+{
+	// Set tesselation levels
+	inner_tess_lvl = inner;
+	outer_tess_lvl = outer;
+
+	// Get shader uniforms
+	projection_u = glGetUniformLocation(program_id, "Projection");
+	modelview_u = glGetUniformLocation(program_id, "Modelview");
+	normal_u = glGetUniformLocation(program_id, "NormalMatrix");
+	light_pos_u = glGetUniformLocation(program_id, "LightPosition");
+	ambient_mat_u = glGetUniformLocation(program_id, "AmbientMaterial");
+	diffuse_mat_u = glGetUniformLocation(program_id, "DiffuseMaterial");
+	inner_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelInner");
+	outer_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelOuter");
 	
-	// Projection matrix
-	projection = glm::perspective(glm::radians(fov),
+	// Initialize projection matrix
+	projection = perspective(radians(fov),
 		aspect_ratio, min_distance, max_distance);
 
-	// Camera matrix
-	view = glm::lookAt
-		(
-			vec3(0, 10, -11),	// Camera position
-			vec3(0, 5, 0),		// where it's looking
-			vec3(0, 1, 0)		// (0, -1, 0) is upside-down
-		);
+	// Update camera view matrix
+	vec3 camera_pos(0, 0, -10);
+	vec3 target_pos(0, 0, 0);
+	vec3 up_vector(0, 1, 0);
+	modelview = lookAt(camera_pos, target_pos, up_vector);
+}
 
-	// model matrix: an identity matrix (model will be at the origin)
-	model = mat4(1.0f);
+void Camera::update(bool rotate)
+{
+	if(rotate)
+		rotate_origin();
 
-	// Our ModelViewProjection: multiplication of our 3 matrices
-	MVP  = projection * view * model; 
+	// Update normal matrix
+	normal = mat3(modelview);
+	// Pack and transpose normal matrix
+	float packed[9] =
+	{
+		normal[0][0], normal[1][0], normal[2][0],
+		normal[0][1], normal[1][1], normal[2][1],
+		normal[0][2], normal[1][2], normal[2][2]
+	};
+
+	// Update uniforms
+	glUniform1f(inner_tess_lvl_u, inner_tess_lvl);
+	glUniform1f(outer_tess_lvl_u, outer_tess_lvl);
+
+	vec4 light_pos(0.25f, 0.25f, 1.0f, 0.0f);
+	glUniform3fv(light_pos_u, 1, &light_pos.x);
+
+	glUniform3f(ambient_mat_u, 0.04f, 0.04f, 0.04f);
+	glUniform3f(diffuse_mat_u, 0, 0.75, 0.75);
+
+	// Send MVP to shaders
+	glUniformMatrix4fv(projection_u, 1, 0, &projection[0][0]);
+	glUniformMatrix4fv(modelview_u, 1, 0, &modelview[0][0]);
+	glUniformMatrix3fv(normal_u, 1, 0, &packed[0]);
 }
 
 void Camera::rotate_origin()
@@ -48,22 +85,17 @@ void Camera::rotate_origin()
 
 	// Create rotation matrix
 	vec3 axis(0.0f, 1.0f, 0.0f);
-	quat rot_quat = glm::angleAxis(glm::degrees(speed), axis);
-	mat4 rotation_matrix = glm::toMat4(rot_quat);
+	quat rot_quat = angleAxis(degrees(speed), axis);
+	mat4 rotation_matrix = toMat4(rot_quat);
 
 	// Rotate
-	model *= rotation_matrix;
-	MVP = projection * view * model;
+	modelview *= rotation_matrix;
 
 	last_time = curr_time;
 }
 
-GLfloat *Camera::get_transformation()
+void Camera::set_tess_lvls(float inner, float outer)
 {
-	return &MVP[0][0];
-}
-
-GLint Camera::get_handle()
-{
-	return matrix_id;
+	inner_tess_lvl = inner;
+	outer_tess_lvl = outer;
 }

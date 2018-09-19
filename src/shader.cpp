@@ -14,7 +14,7 @@
 
 GLuint LoadShaders(const std::string vert_filepath, const std::string tesc_filepath,
 	const std::string tese_filepath, const std::string geom_filepath,
-	const std::string frag_filepath)
+	const std::string frag_filepath, const GLuint position_index)
 {
 	// Create the shaders
 	GLuint vert_shader_id = glCreateShader(GL_VERTEX_SHADER);
@@ -199,6 +199,7 @@ GLuint LoadShaders(const std::string vert_filepath, const std::string tesc_filep
 	glAttachShader(program_id, tese_shader_id);
 	glAttachShader(program_id, geom_shader_id);
 	glAttachShader(program_id, frag_shader_id);
+	glBindAttribLocation(program_id, position_index, "Position");
 	glLinkProgram(program_id);
 
 	// Check the program

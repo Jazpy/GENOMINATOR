@@ -10,21 +10,18 @@ using std::cin;		using std::endl;
 #include <plane.hpp>
 #include <camera.hpp>
 
+static const GLuint position_index = 0;
+
 // Auxiliary setup functions
 void GLFWSetup(GLFWwindow **window);
 void GLEWSetup();
-void GLSetup(GLuint &vao, GLuint &program_id);
+void GLSetup(GLuint &program_id);
 
 // Auxiliary cleanup function
-void Cleanup(GLuint &vao, GLuint &program_id);
+void cleanup(GLuint &program_id);
 
 int main()
 {
-	// Get user input for iterations
-	int iterations;
-	cout << "Number of iterations: ";
-	cin >> iterations;
-
 	// Initialize GLFW and GLEW
 	GLFWwindow *window;
 
@@ -36,33 +33,26 @@ int main()
 		return e;
 	}
 
-	// Setup OpenGL, includes binding VAO and loading shaders
-	GLuint vertex_array_id;
+	// Setup OpenGL, load shaders
 	GLuint program_id;
-	GLSetup(vertex_array_id, program_id);
+	GLSetup(program_id);
 
 	// Setup our camera
-	Camera camera(program_id, 45.0f, 4.0f / 3.0f, 0.1f, 1000.0f);
+	Camera camera(program_id, 90.0f, 16.0f / 9.0f, 5.0f, 150.0f, 3, 2);
 
 	// Simple plane for testing, create and bind
-	Plane plane(iterations);
+	Plane plane(position_index);
 	plane.bind_buffer_data();
-	plane.bind_to_vao();
+	// plane.bind_to_vao();
 
 	do {
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Rotate camera
-		camera.rotate_origin();
+		// Update camera
+		camera.update(true);
 		
-		// Send our transformation to the currently bound shader, 
-		// in the "MVP" uniform
-		glUniformMatrix4fv(camera.get_handle(), 1,
-			GL_FALSE, camera.get_transformation());
-
 		// Draw our current batch
-		glDrawArrays(GL_LINES, 0, plane.get_lines() * 2);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+		glDrawElements(GL_PATCHES, plane.get_index_count(), GL_UNSIGNED_INT, 0);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -71,6 +61,8 @@ int main()
 	// Check if the ESC key was pressed or the window was closed
 	} while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 		glfwWindowShouldClose(window) == 0);
+
+	cleanup(program_id);
 
 	return 0;
 }
@@ -92,13 +84,11 @@ void GLFWSetup(GLFWwindow **window)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	*window = glfwCreateWindow(1024, 768, "Fractals", NULL, NULL);
+	*window = glfwCreateWindow(1920, 1080, "Genominator", NULL, NULL);
 
 	if(*window == NULL)
 	{
-		cerr << "Failed to open GLFW window. "
-			"If you have an Intel GPU, "
-			"they are not 3.3 compatible" << endl;
+		cerr << "Failed to open GLFW window." << endl;
 		glfwTerminate();
 
 		throw -1;
@@ -124,7 +114,7 @@ void GLEWSetup()
 	}
 }
 
-void GLSetup(GLuint &vao, GLuint &program_id)
+void GLSetup(GLuint &program_id)
 {
 	// Enable depth test, accept if fragment is closer to camera
 	// than the former one
@@ -134,26 +124,22 @@ void GLSetup(GLuint &vao, GLuint &program_id)
 	// Enable culling
 	glEnable(GL_CULL_FACE);
 
-	// Generate and bind our VAO
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
 	// Create and compile our GLSL program from the shaders
 	program_id = LoadShaders("../assets/shaders/genominator.vert",
 				 "../assets/shaders/genominator.tesc",
 				 "../assets/shaders/genominator.tese",
 				 "../assets/shaders/genominator.geom",
-				 "../assets/shaders/genominator.frag");
+				 "../assets/shaders/genominator.frag",
+				 position_index);
 
 	// Use our shader
 	glUseProgram(program_id);
 }
 
-void Cleanup(GLuint &vao, GLuint &program_id)
+void cleanup(GLuint &program_id)
 {
-	// Cleanup VBO and shader
+	// Cleanup VBO
 	glDeleteProgram(program_id);
-	glDeleteVertexArrays(1, &vao);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
