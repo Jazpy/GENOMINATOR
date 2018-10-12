@@ -1,7 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <camera.hpp>
-#include <GLFW/glfw3.h>
+#include <time.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -49,7 +49,7 @@ Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
 		aspect_ratio, min_distance, max_distance);
 
 	// Update camera view matrix
-	vec3 camera_pos(15, 15, 15);
+	vec3 camera_pos(0, 15, 25);
 	vec3 target_pos(0, 0, 0);
 	vec3 up_vector(0, 1, 0);
 	modelview = lookAt(camera_pos, target_pos, up_vector);
@@ -89,9 +89,7 @@ void Camera::update(bool rotate)
 void Camera::rotate_origin()
 {
 	// Calculate delta time for smooth rotation
-	static double last_time = glfwGetTime();
-	double curr_time = glfwGetTime();
-	float delta_time = float(curr_time - last_time);
+	float delta_time = Time::get_delta();
 
 	// Get rotation for this frame
 	float speed = 0.005f * delta_time;
@@ -103,8 +101,6 @@ void Camera::rotate_origin()
 
 	// Rotate
 	modelview *= rotation_matrix;
-
-	last_time = curr_time;
 }
 
 void Camera::set_tess_lvls(float inner, float outer)

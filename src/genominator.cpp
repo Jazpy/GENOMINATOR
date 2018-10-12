@@ -9,6 +9,7 @@ using std::cin;		using std::endl;
 #include <shader.hpp>
 #include <plane.hpp>
 #include <camera.hpp>
+#include <time.hpp>
 
 static const GLuint position_index = 0;
 
@@ -38,25 +39,29 @@ int main()
 	GLSetup(program_id);
 
 	// Setup our camera
-	Camera camera(program_id, 90.0f, 16.0f / 9.0f, 0.5f, 1000.0f, 50, 50);
+	Camera camera(program_id, 90.0, 16.0 / 9.0, 0.5, 1000.0, 8, 8);
 
 	// Simple plane for testing, create and bind
-	Plane plane(21.0f, 21.0f, position_index);
-	// plane.sine_wave();
+	Plane plane(30.0f, 30.0f, 25, 25, position_index);
 	plane.bind_buffer_data();
 
 	do {
 		// Update camera
 		camera.update(true);
+
+		// Update model
+		plane.ripple();
 		
 		// Draw our current batch
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPatchParameteri(GL_PATCH_VERTICES, plane.get_control_per_patch());
-		glDrawArrays(GL_PATCHES, 0, plane.get_control_count());
+		plane.render();
 
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		// Update delta time for animations
+		Time::update();
 
 	// Check if the ESC key was pressed or the window was closed
 	} while(glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
@@ -121,8 +126,8 @@ void GLSetup(GLuint &program_id)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); 
 
-	// Enable culling
-	glEnable(GL_CULL_FACE);
+	// Might want to enable culling later, not sure yet
+	// glEnable(GL_CULL_FACE);
 
 	// Create and compile our GLSL program from the shaders
 	program_id = LoadShaders("../assets/shaders/genominator.vert",
