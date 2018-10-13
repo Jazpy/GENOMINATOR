@@ -13,7 +13,7 @@ using std::vector;
 
 typedef vector<vec3>::iterator vec_iter;
 
-// Construct plane with given characteristics
+// Planes consist of stitched-up patch primitives
 Plane::Plane(float x_length, float z_length,
 	size_t x_patches, size_t z_patches,
 	const GLuint pos_index) :
@@ -129,7 +129,8 @@ void Plane::ripple()
 		float x_pow = pow((iter->x + 0), 2);
 		float z_pow = pow((iter->z + 0), 2);
 
-		iter->y = (4.0f * cos(sqrt((x_pow + z_pow) * 1.5f) + displacement) / exp(((x_pow + z_pow) * 0.01f)));
+		iter->y = (4.0f * cos(sqrt((x_pow + z_pow) * 1.5f) + displacement)
+			/ exp(((x_pow + z_pow) * 0.01f)));
 	}
 
 	// Update mesh

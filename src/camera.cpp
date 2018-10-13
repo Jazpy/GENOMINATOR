@@ -26,13 +26,22 @@ Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
 	projection_u = glGetUniformLocation(program_id, "Projection");
 	modelview_u = glGetUniformLocation(program_id, "Modelview");
 	normal_u = glGetUniformLocation(program_id, "NormalMatrix");
-	light_pos_u = glGetUniformLocation(program_id, "LightPosition");
 	ambient_mat_u = glGetUniformLocation(program_id, "AmbientMaterial");
 	diffuse_mat_u = glGetUniformLocation(program_id, "DiffuseMaterial");
+	light_pos_u = glGetUniformLocation(program_id, "LightPos");
 	inner_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelInner");
 	outer_tess_lvl_u = glGetUniformLocation(program_id, "TessLevelOuter");
 	patch_u = glGetUniformLocation(program_id, "B");
 	patch_transpose_u = glGetUniformLocation(program_id, "BT");
+
+	// Update uniforms
+	glUniform1f(inner_tess_lvl_u, inner_tess_lvl);
+	glUniform1f(outer_tess_lvl_u, outer_tess_lvl);
+
+	glUniform3f(ambient_mat_u, 0.1f, 0.1f, 0.25f);
+	glUniform3f(diffuse_mat_u, 0.0f, 0.4f, 0.85f);
+
+	glUniform4f(light_pos_u, 1.0, 1.25, 0, 0);
 
 	// Initialize patch matrices
 	mat4 bezier(
@@ -50,9 +59,10 @@ Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
 
 	// Update camera view matrix
 	vec3 camera_pos(0, 15, 25);
-	vec3 target_pos(0, 0, 0);
+	vec3 target_pos(0, -5, 0);
 	vec3 up_vector(0, 1, 0);
-	modelview = lookAt(camera_pos, target_pos, up_vector);
+	initial_lookat = lookAt(camera_pos, target_pos, up_vector);
+	modelview = initial_lookat;
 }
 
 void Camera::update(bool rotate)
@@ -69,17 +79,7 @@ void Camera::update(bool rotate)
 		normal[0][1], normal[1][1], normal[2][1],
 		normal[0][2], normal[1][2], normal[2][2]
 	};
-
-	// Update uniforms
-	glUniform1f(inner_tess_lvl_u, inner_tess_lvl);
-	glUniform1f(outer_tess_lvl_u, outer_tess_lvl);
-
-	vec4 light_pos(0.0f, 15.0f, 0.0f, 0.0f);
-	glUniform3fv(light_pos_u, 1, &light_pos.x);
-
-	glUniform3f(ambient_mat_u, 0.0f, 0.0f, 0.0f);
-	glUniform3f(diffuse_mat_u, 0.0f, 0.0f, 0.0f);
-
+	
 	// Send MVP to shaders
 	glUniformMatrix4fv(projection_u, 1, 0, &projection[0][0]);
 	glUniformMatrix4fv(modelview_u, 1, 0, &modelview[0][0]);
@@ -92,15 +92,16 @@ void Camera::rotate_origin()
 	float delta_time = Time::get_delta();
 
 	// Get rotation for this frame
-	float speed = 0.005f * delta_time;
+	static float rotation = 0.0f;
+	rotation += 0.008f * delta_time;
 
 	// Create rotation matrix
 	vec3 axis(0.0f, 1.0f, 0.0f);
-	quat rot_quat = angleAxis(degrees(speed), axis);
+	quat rot_quat = angleAxis(degrees(rotation), axis);
 	mat4 rotation_matrix = toMat4(rot_quat);
 
 	// Rotate
-	modelview *= rotation_matrix;
+	modelview = initial_lookat * rotation_matrix;
 }
 
 void Camera::set_tess_lvls(float inner, float outer)

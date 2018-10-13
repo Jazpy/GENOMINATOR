@@ -192,7 +192,7 @@ GLuint LoadShaders(const std::string vert_filepath, const std::string tesc_filep
 	}
 
 	// Link the program
-	std::cout << "Linking program\n" << std::endl;
+	std::cout << "Linking program" << std::endl;
 	GLuint program_id = glCreateProgram();
 	glAttachShader(program_id, vert_shader_id);
 	glAttachShader(program_id, tesc_shader_id);

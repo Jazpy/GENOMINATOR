@@ -2,15 +2,15 @@
 
 out vec4 FragColor;
 in vec3 gFacetNormal;
-in vec3 gTriDistance;
 in vec4 gPatchDistance;
 
-uniform vec3 LightPosition;
-uniform vec3 DiffuseMaterial;
 uniform vec3 AmbientMaterial;
+uniform vec3 DiffuseMaterial;
+uniform vec4 LightPos;
+uniform mat4 Modelview;
 
-const vec3 InnerLineColor = vec3(1, 1, 1);
-const bool DrawLines = true;
+const vec3 line_color = vec3(0.7, 0.7, 0.7);
+const bool draw_lines = true;
 
 float amplify(float d, float scale, float offset)
 {
@@ -23,19 +23,18 @@ float amplify(float d, float scale, float offset)
 void main()
 {
 	vec3 N = normalize(gFacetNormal);
-	vec3 L = LightPosition;
-	vec3 E = vec3(0, 0, 1);
-	vec3 H = normalize(L + E);
+
+	// Transform LightPos into eye coordinates
+	vec4 eye_pos = LightPos * Modelview;
+	vec3 L = vec3(eye_pos.x, eye_pos.y, eye_pos.z);
 
 	float df = abs(dot(N, L));
 	vec3 color = AmbientMaterial + df * DiffuseMaterial;
 
-	if (DrawLines) {
-		float d1 = min(min(gTriDistance.x, gTriDistance.y), gTriDistance.z);
-		float d2 = min(min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z), gPatchDistance.w);
-		d1 = 1 - amplify(d1, 50, -0.5);
-		d2 = amplify(d2, 50, -0.5);
-		color = d2 * color + d1 * d2 * InnerLineColor;
+	if (draw_lines) {
+		float d = min(min(min(gPatchDistance.x, gPatchDistance.y), gPatchDistance.z), gPatchDistance.w);
+		d = 1 - amplify(d, 120, -0.1);
+		color = color + d * line_color;
 	}
 
 	FragColor = vec4(color, 1.0);
