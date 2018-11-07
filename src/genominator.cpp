@@ -3,11 +3,15 @@
 using std::cout;	using std::cerr;
 using std::cin;		using std::endl;
 
+#include <glm/glm.hpp>
+
+using glm::vec3;
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <shader.hpp>
-#include <plane.hpp>
+#include <tower.hpp>
 #include <camera.hpp>
 #include <time.hpp>
 
@@ -39,11 +43,16 @@ int main()
 	GLSetup(program_id);
 
 	// Setup our camera
-	Camera camera(program_id, 90.0, 16.0 / 9.0, 0.5, 100.0, 10, 10);
+	Camera camera(program_id, 90.0, 16.0 / 9.0, 0.5, 300.0, 8, 8);
+	camera.lookat(vec3(40, 80, 0), vec3(0, 80, 0));
 
 	// Simple plane for testing, create and bind
+	/*
 	Plane plane(30.0f, 30.0f, 11, 11, position_index);
 	plane.bind_buffer_data();
+	*/
+	Tower tower(50.0f, 160.0f, 200, 200, position_index);
+	tower.bind_buffer_data();
 
 	do {
 		// Update camera
@@ -52,11 +61,13 @@ int main()
 		Time::update();
 
 		// Update model
-		plane.ripple();
+		//plane.ripple();
+		tower.sine_wave();
 		
 		// Draw our current batch
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		plane.render();
+		//plane.render();
+		tower.render();
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -88,7 +99,7 @@ void GLFWSetup(GLFWwindow **window)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	*window = glfwCreateWindow(1600, 900, "Genominator", NULL, NULL);
+	*window = glfwCreateWindow(1920, 1080, "Genominator", NULL, NULL);
 
 	if(*window == NULL)
 	{
@@ -129,12 +140,17 @@ void GLSetup(GLuint &program_id)
 	// glEnable(GL_CULL_FACE);
 
 	// Create and compile our GLSL program from the shaders
-	program_id = LoadShaders("../assets/shaders/genominator.vert",
-				 "../assets/shaders/genominator.tesc",
-				 "../assets/shaders/genominator.tese",
-				 "../assets/shaders/genominator.geom",
-				 "../assets/shaders/genominator.frag",
+	/*
+	program_id = LoadShaders("../assets/shaders/tess/genominator.vert",
+				 "../assets/shaders/tess/genominator.tesc",
+				 "../assets/shaders/tess/genominator.tese",
+				 "../assets/shaders/tess/genominator.geom",
+				 "../assets/shaders/tess/genominator.frag",
 				 position_index);
+	*/
+	program_id = LoadShadersSimple("../assets/shaders/simple/genominator.vert",
+				       "../assets/shaders/simple/genominator.frag",
+				       position_index);
 
 	// Use our shader
 	glUseProgram(program_id);

@@ -57,7 +57,7 @@ Camera::Camera(GLuint program_id, float fov, float aspect_ratio,
 	projection = perspective(radians(fov),
 		aspect_ratio, min_distance, max_distance);
 
-	// Update camera view matrix
+	// Initialize camera view matrix
 	vec3 camera_pos(0, 15, 25);
 	vec3 target_pos(0, -5, 0);
 	vec3 up_vector(0, 1, 0);
@@ -93,7 +93,7 @@ void Camera::rotate_origin()
 
 	// Get rotation for this frame
 	static float rotation = 0.0f;
-	rotation += 0.008f * delta_time;
+	rotation += 0.006f * delta_time;
 
 	// Create rotation matrix
 	vec3 axis(0.0f, 1.0f, 0.0f);
@@ -102,6 +102,13 @@ void Camera::rotate_origin()
 
 	// Rotate
 	modelview = initial_lookat * rotation_matrix;
+}
+
+void Camera::lookat(vec3 pos, vec3 target)
+{
+	vec3 up_vector(0, 1, 0);
+	initial_lookat = lookAt(pos, target, up_vector);
+	modelview = initial_lookat;
 }
 
 void Camera::set_tess_lvls(float inner, float outer)

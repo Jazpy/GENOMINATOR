@@ -19,7 +19,7 @@ Plane::Plane(float x_length, float z_length,
 	const GLuint pos_index) :
 	position_index(pos_index)
 {
-	// Patches will consist of 16 control points, reserve vector space
+	// Each patch has 16 control points, reserve vector space
 	control_points.reserve(16 * x_patches * z_patches);
 
 	float x_patch_step = x_length / x_patches;
@@ -60,6 +60,9 @@ Plane::Plane(float x_length, float z_length,
 
 Plane::~Plane()
 {
+	// Delete VAO
+	glDeleteVertexArrays(1, &vao_id);
+
 	// Cleanup VBO
 	glDeleteBuffers(1, &vertex_buffer_id);
 
@@ -78,23 +81,23 @@ void Plane::bind_buffer_data()
 	glBufferData(GL_ARRAY_BUFFER, total_size, &control_points[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(position_index);
 	glVertexAttribPointer(position_index, 3, GL_FLOAT, GL_FALSE, stride, 0);
+
+	// Render parameters	
+	// glPatchParameteri(GL_PATCH_VERTICES, 16);
 }
 
 void Plane::update_VBO()
 {
-	// glBindVertexArray(vao_id);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, total_size, &control_points[0]);
 }
 
 void Plane::render()
 {
-	// Bind VAO for this object
+	// Bind VAO for this object and draw
 	glBindVertexArray(vao_id);
-
-	// Update render parameters and draw
-	glPatchParameteri(GL_PATCH_VERTICES, 16);
-	glDrawArrays(GL_PATCHES, 0, control_points.size());
+	glDrawArrays(GL_POINTS, 0, control_points.size());
+	//glDrawArrays(GL_PATCHES, 0, control_points.size());
 }
 
 void Plane::sine_wave()

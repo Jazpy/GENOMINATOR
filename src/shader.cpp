@@ -227,4 +227,104 @@ GLuint LoadShaders(const std::string vert_filepath, const std::string tesc_filep
 	return program_id;
 }
 
+GLuint LoadShadersSimple(const std::string vert_filepath,
+	const std::string frag_filepath, const GLuint position_index)
+{
+	// Create the shaders
+	GLuint vert_shader_id = glCreateShader(GL_VERTEX_SHADER);
+	GLuint frag_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+
+	// Read the Vertex Shader code from the file
+	std::string vert_shader_code;
+	std::ifstream vert_shader_stream(vert_filepath, std::ios::in);
+	if(vert_shader_stream.is_open())
+	{
+		std::stringstream sstr;
+		sstr << vert_shader_stream.rdbuf();
+		vert_shader_code = sstr.str();
+		vert_shader_stream.close();
+	} else {
+		std::cout << "Impossible to open " << vert_filepath << 
+			". Are you in the right directory ? " << std::endl;
+
+		return 0;
+	}
+
+	// Read the Fragment Shader code from the file
+	std::string frag_shader_code;
+	std::ifstream frag_shader_stream(frag_filepath, std::ios::in);
+	if(frag_shader_stream.is_open())
+	{
+		std::stringstream sstr;
+		sstr << frag_shader_stream.rdbuf();
+		frag_shader_code = sstr.str();
+		frag_shader_stream.close();
+	}
+
+	GLint result = GL_FALSE;
+	int info_log_length;
+
+	// Compile Vertex Shader
+	std::cout << "Compiling shader: " << vert_filepath << std::endl;
+	char const *vert_source_pointer = vert_shader_code.c_str();
+	glShaderSource(vert_shader_id, 1, &vert_source_pointer, NULL);
+	glCompileShader(vert_shader_id);
+
+	// Check Vertex Shader
+	glGetShaderiv(vert_shader_id, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(vert_shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+	if(info_log_length > 0)
+	{
+		std::vector<char> vert_shader_error_message(
+			info_log_length + 1);
+		glGetShaderInfoLog(vert_shader_id, info_log_length,
+			NULL, &vert_shader_error_message[0]);
+		std::cout << &vert_shader_error_message[0] << std::endl;
+	}
+
+	// Compile Fragment Shader
+	std::cout << "Compiling shader: " << frag_filepath << std::endl;
+	char const *frag_source_pointer = frag_shader_code.c_str();
+	glShaderSource(frag_shader_id, 1, &frag_source_pointer, NULL);
+	glCompileShader(frag_shader_id);
+
+	// Check Fragment Shader
+	glGetShaderiv(frag_shader_id, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(frag_shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+	if(info_log_length > 0)
+	{
+		std::vector<char> frag_shader_error_message(
+			info_log_length + 1);
+		glGetShaderInfoLog(frag_shader_id, info_log_length,
+			NULL, &frag_shader_error_message[0]);
+		std::cout << &frag_shader_error_message[0] << std::endl;
+	}
+
+	// Link the program
+	std::cout << "Linking program" << std::endl;
+	GLuint program_id = glCreateProgram();
+	glAttachShader(program_id, vert_shader_id);
+	glAttachShader(program_id, frag_shader_id);
+	glBindAttribLocation(program_id, position_index, "Position");
+	glLinkProgram(program_id);
+
+	// Check the program
+	glGetProgramiv(program_id, GL_LINK_STATUS, &result);
+	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_log_length);
+	if(info_log_length > 0){
+		std::vector<char> program_error_message(info_log_length + 1);
+		glGetProgramInfoLog(program_id, info_log_length,
+			NULL, &program_error_message[0]);
+		std::cout << &program_error_message[0] << std::endl;
+	}
+	
+	glDetachShader(program_id, vert_shader_id);
+	glDetachShader(program_id, frag_shader_id);
+	
+	glDeleteShader(vert_shader_id);
+	glDeleteShader(frag_shader_id);
+
+	return program_id;
+}
+
 

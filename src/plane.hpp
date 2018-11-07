@@ -35,7 +35,7 @@ class Plane
 		const GLuint pos_index);
 	~Plane();
 
-	// Bind vertex and color data
+	// Bind vertex data
 	void bind_buffer_data();
 
 	// Bind VAO and render

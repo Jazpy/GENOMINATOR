@@ -13,6 +13,7 @@ add_executable(genominator
 	    src/plane.cpp
 	    src/camera.cpp
 	    src/time.cpp
+	    src/tower.cpp
 	    )
 
 target_link_libraries(genominator glfw ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})

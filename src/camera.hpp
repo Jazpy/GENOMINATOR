@@ -33,6 +33,8 @@ class Camera
 	void update(bool rotate);
 	// Rotate around the origin
 	void rotate_origin();
+	// Update camera's position and target in space
+	void lookat(glm::vec3 pos, glm::vec3 target);
 
 	// Update tesselation levels
 	void set_tess_lvls(float inner, float outer);
