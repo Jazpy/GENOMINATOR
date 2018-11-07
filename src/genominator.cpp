@@ -43,15 +43,11 @@ int main()
 	GLSetup(program_id);
 
 	// Setup our camera
-	Camera camera(program_id, 90.0, 16.0 / 9.0, 0.5, 300.0, 8, 8);
-	camera.lookat(vec3(40, 80, 0), vec3(0, 80, 0));
+	Camera camera(program_id, 45.0, 16.0 / 9.0, 0.5, 500.0, 8, 8);
+	camera.lookat(vec3(1, 0, 0), vec3(0, 300, 0));
 
 	// Simple plane for testing, create and bind
-	/*
-	Plane plane(30.0f, 30.0f, 11, 11, position_index);
-	plane.bind_buffer_data();
-	*/
-	Tower tower(50.0f, 160.0f, 200, 200, position_index);
+	Tower tower(30.0f, 300.0f, 300, 300, position_index);
 	tower.bind_buffer_data();
 
 	do {
@@ -61,12 +57,10 @@ int main()
 		Time::update();
 
 		// Update model
-		//plane.ripple();
 		tower.sine_wave();
 		
 		// Draw our current batch
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//plane.render();
 		tower.render();
 
 		// Swap buffers

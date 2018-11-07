@@ -56,8 +56,8 @@ class Tower::Ring
 
 	void sine_wave(float displacement)
 	{
-		float period = 12.0f;
-		float amplitude = 1.0f;
+		float period = 16.0f;
+		float amplitude = 10.0f;
 		float rad_step = 2 * M_PI / points * period;
 		for(int i = 0; i != points; ++i)
 		{
@@ -84,7 +84,7 @@ Tower::Tower(float base_diameter, float height, int total_rings,
 	for(int i = 0; i != total_rings; ++i)
 	{
 		rings.push_back(Ring(points_per_ring, i * points_per_ring,
-			base_diameter + 1.1f * sin(i * 0.4f), i * (height / total_rings), 
+			base_diameter, i * (height / total_rings), 
 			vertex_data, color_data));
 	}
 
