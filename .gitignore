@@ -1,5 +1,6 @@
 # Folders
 build/*
+!build/.gitkeep
 
 # Compiled Object files
 *.o
